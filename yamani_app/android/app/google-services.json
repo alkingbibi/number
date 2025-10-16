@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "524330739259",
+    "project_id": "yamani-app-alking",
+    "storage_bucket": "yamani-app-alking.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:524330739259:android:9cb35ebb230a11580fde1e",
+        "android_client_info": {
+          "package_name": "com.example.yamani_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPCi14MLoDq2j9fxglIJWVFufb4lpWx1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
