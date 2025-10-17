@@ -1,62 +1,51 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.gms.google-services") // إعادة إضافة السطر الأهم
+    id("com.google.gms.google-services")
     id("dev.flutter.flutter-gradle-plugin")
 }
-
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
+    
+val localProperties = java.util.Properties()
+val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
-        localProperties.load(reader)
-    }
+    localProperties.load(localPropertiesFile.reader())
 }
-
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
-}
-
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
-}
-
+    
+val flutterVersionCode = localProperties.getProperty("flutter.versionCode") ?: "1"
+val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0"
+    
 android {
     namespace = "com.example.yamani_app"
-    compileSdk = 34 // استخدام أحدث SDK
+    compileSdk = 34
     ndkVersion = "25.1.8937393"
-
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
+    
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = "1.8"
     }
-
+    
     defaultConfig {
         applicationId = "com.example.yamani_app"
         minSdk = 21
         targetSdk = 34
-        versionCode = flutterVersionCode.toInteger()
+        versionCode = flutterVersionCode.toInt()
         versionName = flutterVersionName
-        multiDexEnabled = true // إضافة هذا السطر لتجنب مشاكل مستقبلية
+        multiDexEnabled = true
     }
-
+    
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
-
+    
 flutter {
-    source = '../..'
+    source = "../.."
 }
-
-dependencies {
-    // لا تقم بإضافة أي شيء هنا يدوياً، فلاتر يقوم بذلك تلقائياً
-}
+    
+dependencies {}
