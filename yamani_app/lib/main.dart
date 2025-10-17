@@ -36,14 +36,10 @@ class YamaniApp extends StatelessWidget {
           foregroundColor: Colors.white,
           elevation: 5,
           centerTitle: true,
-          titleTextStyle: TextStyle(fontFamily: 'Tajawal', fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF000000),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            padding: const EdgeInsets.symmetric(vertical: 14),
+          titleTextStyle: TextStyle(
+            fontFamily: 'Tajawal',
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -99,6 +95,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
+// ========================== الصفحة الرئيسية ==========================
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -118,7 +116,10 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    setState(() { isLoading = true; resultWidget = const SizedBox.shrink(); });
+    setState(() {
+      isLoading = true;
+      resultWidget = const SizedBox.shrink();
+    });
 
     try {
       final doc = await FirebaseFirestore.instance.collection('numbers').doc(number).get();
@@ -141,53 +142,9 @@ class _HomePageState extends State<HomePage> {
       });
     }
 
-    setState(() { isLoading = false; });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text('🇾🇪'),
-            SizedBox(width: 8),
-            Text('يماني كاشف'),
-          ],
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: phoneController,
-              keyboardType: TextInputType.phone,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              decoration: InputDecoration(
-                hintText: 'أدخل الرقم هنا',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                prefixIcon: const Icon(Icons.phone_android),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: isLoading ? null : searchNumber,
-              icon: isLoading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3.0,)) : const Icon(Icons.search),
-              label: Text(isLoading ? 'جاري البحث...' : 'بـحـث'),
-            ),
-            const SizedBox(height: 24),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 500),
-              child: resultWidget,
-            ),
-          ],
-        ),
-      ),
-    );
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Widget _buildResultCard(String number, List<String> names, int count) {
@@ -239,7 +196,44 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('يماني كاشف 🇾🇪')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: phoneController,
+              keyboardType: TextInputType.phone,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                hintText: 'أدخل الرقم هنا',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                prefixIcon: const Icon(Icons.phone),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: isLoading ? null : searchNumber,
+              icon: isLoading
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                  : const Icon(Icons.search),
+              label: Text(isLoading ? 'جاري البحث...' : 'بحث'),
+            ),
+            const SizedBox(height: 24),
+            AnimatedSwitcher(duration: const Duration(milliseconds: 500), child: resultWidget),
+          ],
+        ),
+      ),
+    );
+  }
 }
+
+// ========================== صفحة المساهمة ==========================
 
 class ContributionPage extends StatefulWidget {
   const ContributionPage({super.key});
@@ -262,17 +256,24 @@ class _ContributionPageState extends State<ContributionPage> {
 
     final permission = await Permission.contacts.request();
     if (permission.isGranted) {
-      setState(() { syncStatus = 'تم الحصول على الإذن. جاري القراءة...'; });
+      setState(() {
+        syncStatus = 'تم الحصول على الإذن. جاري القراءة...';
+      });
+
+      // ✅ هنا نقرأ جهات الاتصال
       final List<Contact> contacts = await ContactsService.getContacts(withThumbnails: false);
-      setState(() { syncStatus = 'تم قراءة ${contacts.length} اسم. جاري الرفع للسحابة...'; });
+      setState(() {
+        syncStatus = 'تم قراءة ${contacts.length} جهة اتصال. جاري الرفع...';
+      });
 
       final batch = FirebaseFirestore.instance.batch();
-      
+
       for (final contact in contacts) {
         if (contact.phones != null && contact.phones!.isNotEmpty) {
           for (final phone in contact.phones!) {
-            if (phone.value != null) {
-              final cleanNumber = phone.value!.replaceAll(RegExp(r'[^0-9+]'), '');
+            final String? phoneNumber = phone.value;
+            if (phoneNumber != null && phoneNumber.trim().isNotEmpty) {
+              final cleanNumber = phoneNumber.replaceAll(RegExp(r'[^0-9+]'), '');
               if (cleanNumber.length > 6) {
                 final docRef = FirebaseFirestore.instance.collection('numbers').doc(cleanNumber);
                 batch.set(
@@ -290,15 +291,15 @@ class _ContributionPageState extends State<ContributionPage> {
       }
 
       await batch.commit();
+
       setState(() {
-        syncStatus = 'اكتملت المساهمة بنجاح! شكراً لمساهمتك القيمة!';
+        syncStatus = '✅ اكتملت المساهمة بنجاح! شكراً لمساهمتك.';
         statusColor = Colors.green;
         isSyncing = false;
       });
-
     } else {
       setState(() {
-        syncStatus = 'تم رفض الإذن. لا يمكن المساهمة بدون موافقتك.';
+        syncStatus = '❌ تم رفض الإذن. لا يمكن المتابعة بدون إذنك.';
         statusColor = Colors.red;
         isSyncing = false;
       });
@@ -318,21 +319,20 @@ class _ContributionPageState extends State<ContributionPage> {
             const Icon(Icons.people_alt, size: 80, color: Color(0xFFCE1126)),
             const SizedBox(height: 16),
             const Text('كن جزءاً من الحل!', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const Text('بمساهمتك بجهات اتصالك، أنت تساعد/ين آلاف اليمنيين على كشف الأرقام المجهولة. بياناتك آمنة وتستخدم فقط لتحسين قاعدة البيانات للجميع.', textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 32),
+            const SizedBox(height: 10),
+            Text(syncStatus, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: statusColor)),
+            const SizedBox(height: 30),
             ElevatedButton.icon(
               onPressed: isSyncing ? null : syncContacts,
-              icon: isSyncing ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3.0,)) : const Icon(Icons.cloud_upload),
+              icon: isSyncing
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+                  : const Icon(Icons.cloud_upload),
               label: const Text('المساهمة بجهات الاتصال'),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green[700]),
             ),
-            const SizedBox(height: 24),
-            Text(syncStatus, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: statusColor)),
           ],
         ),
       ),
     );
   }
 }
-
-
