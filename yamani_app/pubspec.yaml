@@ -36,8 +36,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   firebase_core: ^2.32.0
   cloud_firestore: ^4.17.5
-  contacts_service: ^0.6.3
-  permission_handler: ^10.4.5
+  contacts_service: ^0.7.0
+  permission_handler: ^11.0.0
 
 
 dev_dependencies:
