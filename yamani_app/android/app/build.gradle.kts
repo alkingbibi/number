@@ -1,48 +1,62 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services") // إعادة إضافة السطر الأهم
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
 }
 
 android {
     namespace = "com.example.yamani_app"
-    compileSdk = 34
+    compileSdk = 34 // استخدام أحدث SDK
+    ndkVersion = "25.1.8937393"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 
     defaultConfig {
         applicationId = "com.example.yamani_app"
         minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = flutterVersionCode.toInteger()
+        versionName = flutterVersionName
+        multiDexEnabled = true // إضافة هذا السطر لتجنب مشاكل مستقبلية
     }
 
     buildTypes {
         release {
-            // يمكن تعديل هذا لاحقًا عند توقيع التطبيق
-            isMinifyEnabled = false
-            isShrinkResources = false
+            signingConfig = signingConfigs.debug
         }
-        debug {
-            isMinifyEnabled = false
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
-    // إصلاح محتمل للأذونات وNDK
-    ndkVersion = "27.0.12077973"
-    buildFeatures {
-        viewBinding = true
     }
 }
 
 flutter {
-    source = "../.."
+    source = '../..'
+}
+
+dependencies {
+    // لا تقم بإضافة أي شيء هنا يدوياً، فلاتر يقوم بذلك تلقائياً
 }
