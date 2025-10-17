@@ -11,10 +11,10 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-  firebase_core:
-  cloud_firestore:
-  contacts_service:
-  permission_handler:
+  firebase_core: ^2.32.0
+  cloud_firestore: ^4.17.5
+  permission_handler: ^11.3.1
+  contacts_service: 0.7.0 # <--- انظر هنا! قمنا بتثبيت الإصدار بالضبط
 
 dev_dependencies:
   flutter_test:
